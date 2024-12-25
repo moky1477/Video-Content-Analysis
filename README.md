@@ -11,6 +11,13 @@ This project is a FastAPI-based web service that processes video files to extrac
 - **Face Detection**: Detects faces in video frames using OpenCV's pre-trained Haar cascades.
 - **Inappropriate Language Filtering**: Checks transcriptions for inappropriate language from a predefined list of offensive words.
 
+## Results:
+
+![image](https://github.com/user-attachments/assets/bb9a6a1f-2009-4174-bbc9-f5bcda8c6037)
+
+![image](https://github.com/user-attachments/assets/05c0525e-edef-4938-938d-236baeb06b74)
+
+
 ## Dependencies
 - FastAPI: Web framework used to create the API.
 - Uvicorn: ASGI server to run the FastAPI application.
