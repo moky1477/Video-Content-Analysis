@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Analyzer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Video Analysis Tool</h1>
+    <form id="video-upload-form">
+      <label for="video">Upload Video:</label>
+      <input type="file" id="video" name="video" accept="video/*" required>
+      <button type="submit">Analyze Video</button>
+    </form>
+
+    <div id="response-container">
+      <!-- Results will be displayed here -->
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
