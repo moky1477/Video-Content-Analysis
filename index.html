@@ -94,7 +94,7 @@
             display: inline-block;
             padding: 5px 10px;
             border-radius: 15px;
-            margin-left: 10px;
+            margin: 5px;
             font-size: 0.9rem;
         }
 
@@ -118,6 +118,24 @@
             text-align: center;
             margin: 1rem 0;
             display: none;
+        }
+
+        .flags-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .transcription-text {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
         }
     </style>
 </head>
@@ -156,7 +174,7 @@
             </div>
             <div class="result-item">
                 <strong>Transcription:</strong>
-                <p id="transcription"></p>
+                <div id="transcription" class="transcription-text"></div>
             </div>
         </div>
     </div>
@@ -249,21 +267,44 @@
             document.getElementById('transcription').textContent = data.transcription;
 
             const contentFlags = document.getElementById('contentFlags');
-            contentFlags.innerHTML = '';
+            contentFlags.innerHTML = '<div class="flags-grid">';
 
-            // Display content flags
-            if (data.human_face_detected) {
-                contentFlags.innerHTML += '<span class="flag flag-warning">Human Faces Detected</span>';
-            }
-            if (data.nsfw_detected) {
-                contentFlags.innerHTML += '<span class="flag flag-danger">NSFW Content Detected</span>';
-            }
-            if (data.inappropriate_language_detected) {
-                contentFlags.innerHTML += '<span class="flag flag-warning">Inappropriate Language</span>';
-            }
-            if (!data.human_face_detected && !data.nsfw_detected && !data.inappropriate_language_detected) {
-                contentFlags.innerHTML += '<span class="flag flag-success">No Content Warnings</span>';
-            }
+            // Define all possible flags and their status
+            const flags = [
+                {
+                    condition: data.human_face_detected,
+                    positive: "Human Faces Detected",
+                    negative: "No Human Faces Detected",
+                    type: "warning"
+                },
+                {
+                    condition: data.nsfw_detected,
+                    positive: "NSFW Content Detected",
+                    negative: "No NSFW Content Detected",
+                    type: "danger"
+                },
+                {
+                    condition: data.inappropriate_language_detected,
+                    positive: "Inappropriate Language Found",
+                    negative: "No Inappropriate Language",
+                    type: "warning"
+                }
+            ];
+
+            // Display all flags with their status
+            flags.forEach(flag => {
+                const status = flag.condition;
+                const message = status ? flag.positive : flag.negative;
+                const flagType = status ? flag.type : "success";
+                
+                contentFlags.innerHTML += `
+                    <span class="flag flag-${flagType}">
+                        ${message}
+                    </span>
+                `;
+            });
+
+            contentFlags.innerHTML += '</div>';
 
             progressContainer.style.display = 'none';
             results.style.display = 'block';
