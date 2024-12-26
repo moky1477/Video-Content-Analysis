@@ -116,6 +116,16 @@ def detect_faces_in_images(image_folder):
 app = FastAPI()
 transcription_system = VideoTranscriptionLanguageDetector()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.post("/analyze-video/")
 async def analyze_video_endpoint(file: UploadFile = File(...)):

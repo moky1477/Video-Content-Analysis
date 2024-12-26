@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Analysis Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .upload-section {
+            text-align: center;
+            padding: 2rem;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .upload-section.dragover {
+            background-color: #e9ecef;
+            border-color: #0d6efd;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .upload-btn {
+            background-color: #0d6efd;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 10px 0;
+        }
+
+        .upload-btn:hover {
+            background-color: #0b5ed7;
+        }
+
+        #progressContainer {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background-color: #0d6efd;
+            transition: width 0.3s ease;
+        }
+
+        #results {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .result-item {
+            margin: 10px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .flag {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin-left: 10px;
+            font-size: 0.9rem;
+        }
+
+        .flag-warning {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .flag-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .flag-success {
+            background-color: #198754;
+            color: white;
+        }
+
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            margin: 1rem 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Video Content Analysis</h1>
+        
+        <div class="upload-section" id="dropZone">
+            <input type="file" id="fileInput" accept="video/*">
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                Choose Video File
+            </button>
+            <p>or drag and drop your video file here</p>
+        </div>
+
+        <div id="progressContainer">
+            <p>Analyzing video...</p>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div id="results">
+            <h2>Analysis Results</h2>
+            <div class="result-item">
+                <strong>File Name:</strong> <span id="fileName"></span>
+            </div>
+            <div class="result-item">
+                <strong>Language:</strong> <span id="language"></span>
+            </div>
+            <div class="result-item">
+                <strong>Content Flags:</strong>
+                <div id="contentFlags"></div>
+            </div>
+            <div class="result-item">
+                <strong>Transcription:</strong>
+                <p id="transcription"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const results = document.getElementById('results');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Drag and drop handlers
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('video/')) {
+                handleFileUpload(file);
+            } else {
+                showError('Please upload a valid video file.');
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFileUpload(file);
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            progressContainer.style.display = 'none';
+        }
+
+        function handleFileUpload(file) {
+            // Reset UI
+            errorMessage.style.display = 'none';
+            results.style.display = 'none';
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // Simulate upload progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                if (progress < 90) {
+                    progress += 10;
+                    progressBar.style.width = `${progress}%`;
+                }
+            }, 500);
+
+            fetch('http://localhost:8000/analyze-video/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                clearInterval(progressInterval);
+                if (!response.ok) {
+                    throw new Error('Analysis failed');
+                }
+                progressBar.style.width = '100%';
+                return response.json();
+            })
+            .then(data => {
+                displayResults(data);
+            })
+            .catch(error => {
+                clearInterval(progressInterval);
+                showError(`Error: ${error.message}`);
+            });
+        }
+
+        function displayResults(data) {
+            document.getElementById('fileName').textContent = data.video_path;
+            document.getElementById('language').textContent = data.language || 'Unknown';
+            document.getElementById('transcription').textContent = data.transcription;
+
+            const contentFlags = document.getElementById('contentFlags');
+            contentFlags.innerHTML = '';
+
+            // Display content flags
+            if (data.human_face_detected) {
+                contentFlags.innerHTML += '<span class="flag flag-warning">Human Faces Detected</span>';
+            }
+            if (data.nsfw_detected) {
+                contentFlags.innerHTML += '<span class="flag flag-danger">NSFW Content Detected</span>';
+            }
+            if (data.inappropriate_language_detected) {
+                contentFlags.innerHTML += '<span class="flag flag-warning">Inappropriate Language</span>';
+            }
+            if (!data.human_face_detected && !data.nsfw_detected && !data.inappropriate_language_detected) {
+                contentFlags.innerHTML += '<span class="flag flag-success">No Content Warnings</span>';
+            }
+
+            progressContainer.style.display = 'none';
+            results.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
