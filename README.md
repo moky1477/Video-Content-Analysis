@@ -13,8 +13,7 @@ This project is a FastAPI-based web service that processes video files to extrac
 
 ## Results:
 
-![image](https://github.com/user-attachments/assets/ed481835-4f55-4176-8641-28e5e7257d2d)
-
+![image](https://github.com/user-attachments/assets/e6ffbab6-4cf2-45f9-81df-c21045ec8e34)
 
 ## Prerequisites
 - Python 3.11 or above
